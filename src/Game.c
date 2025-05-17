@@ -57,6 +57,11 @@ static cc_bool gameRunning;
 static float gfx_minFrameMs;
 static cc_bool autoPause;
 
+// TODO: is there a better way to control the game state?
+void Game_SetRunning(cc_bool running) {
+    gameRunning = running;
+}
+
 cc_bool Game_ClassicMode, Game_ClassicHacks;
 cc_bool Game_AllowCustomBlocks;
 cc_bool Game_AllowServerTextures;
@@ -516,6 +521,10 @@ void Game_SetMinFrameTime(float frameTimeMS) {
 static void Render3DFrame(float delta, float t) {
 	struct Matrix mvp;
 	Vec3 pos;
+    
+#ifdef CC_BUILD_XR
+    Gfx_SetRenderSemanticPhase(SemanticPhase_CameraView);
+#endif
 
 	Camera.Active->GetView(&Gfx.View);
 	/*Gfx_LoadMatrix(MATRIX_PROJ, &Gfx.Projection);

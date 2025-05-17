@@ -1,5 +1,5 @@
 #include "Core.h"
-#if defined CC_BUILD_IOS
+#if defined CC_BUILD_IOS_LIKE
 #include "Bitmap.h"
 #include "Input.h"
 #include "Platform.h"
@@ -18,13 +18,13 @@
 #include <CoreText/CoreText.h>
 
 #ifdef TARGET_OS_TV
-	// NSFontAttributeName etc - iOS 6.0
-	#define TEXT_ATTRIBUTE_FONT  NSFontAttributeName
-	#define TEXT_ATTRIBUTE_COLOR NSForegroundColorAttributeName
+    // NSFontAttributeName etc - iOS 6.0
+    #define TEXT_ATTRIBUTE_FONT  NSFontAttributeName
+    #define TEXT_ATTRIBUTE_COLOR NSForegroundColorAttributeName
 #else
-	// UITextAttributeFont etc - iOS 5.0
-	#define TEXT_ATTRIBUTE_FONT  UITextAttributeFont
-	#define TEXT_ATTRIBUTE_COLOR UITextAttributeTextColor
+    // UITextAttributeFont etc - iOS 5.0
+    #define TEXT_ATTRIBUTE_FONT  UITextAttributeFont
+    #define TEXT_ATTRIBUTE_COLOR UITextAttributeTextColor
 #endif
 
 // shared state with interop_ios.m
@@ -275,17 +275,17 @@ void LBackend_InitFramebuffer(void) { }
 void LBackend_FreeFramebuffer(void) { }
 
 void LBackend_Redraw(void) {
-	struct Context2D ctx;
-	struct Bitmap bmp;
-	int width  = max(Window_Main.Width,  1);
-	int height = max(Window_Main.Height, 1);
-	
-	Window_AllocFramebuffer(&bmp, width, height);
-		Context2D_Wrap(&ctx, &bmp);
-		Launcher_Active->DrawBackground(Launcher_Active, &ctx);
-		Rect2D rect = { 0, 0, width, height };
-		Window_DrawFramebuffer(rect, &bmp);
-	Window_FreeFramebuffer(&bmp);
+    struct Context2D ctx;
+    struct Bitmap bmp;
+    int width  = max(Window_Main.Width,  1);
+    int height = max(Window_Main.Height, 1);
+    
+    Window_AllocFramebuffer(&bmp, width, height);
+        Context2D_Wrap(&ctx, &bmp);
+        Launcher_Active->DrawBackground(Launcher_Active, &ctx);
+        Rect2D rect = { 0, 0, width, height };
+        Window_DrawFramebuffer(rect, &bmp);
+    Window_FreeFramebuffer(&bmp);
 }
 
 static void LBackend_ButtonUpdateBackground(struct LButton* w);
@@ -330,11 +330,19 @@ void LBackend_ButtonInit(struct LButton* w, int width, int height) {
 }
 
 static UIView* LBackend_ButtonShow(struct LButton* w) {
+    if (!NSThread.isMainThread) {
+        __block UIView* result = nil;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            result = LBackend_ButtonShow(w);
+        });
+        return result;
+    }
+
     UIButton* btn = [[UIButton alloc] init];
     btn.frame = CGRectMake(0, 0, w->_textWidth, w->_textHeight);
     [btn addTarget:ui_controller action:@selector(handleButtonPress:) forControlEvents:UIControlEventTouchUpInside];
     
-    w->meta = (__bridge void*)btn;
+    w->meta = CFBridgingRetain(btn);
     LBackend_ButtonUpdateBackground(w);
     LBackend_ButtonUpdate(w);
     return btn;
@@ -358,6 +366,15 @@ void LBackend_ButtonDraw(struct LButton* w) { }
 void LBackend_CheckboxInit(struct LCheckbox* w) { }
 
 static UIView* LBackend_CheckboxShow(struct LCheckbox* w) {
+    if (!NSThread.isMainThread) {
+        __block UIView* result = nil;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            result = LBackend_CheckboxShow(w);
+        });
+        return result;
+    }
+
+    
     UIView* root  = [[UIView alloc] init];
     CGRect frame;
     
@@ -386,7 +403,7 @@ static UIView* LBackend_CheckboxShow(struct LCheckbox* w) {
     root.frame = frame;
     
     //root.userInteractionEnabled = YES;
-    w->meta = (__bridge void*)root;
+    w->meta = CFBridgingRetain(root);
     LBackend_CheckboxUpdate(w);
     return root;
 }
@@ -430,6 +447,15 @@ void LBackend_InputInit(struct LInput* w, int width) {
 }
 
 static UIView* LBackend_InputShow(struct LInput* w) {
+    if (!NSThread.isMainThread) {
+        __block UIView* result = nil;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            result = LBackend_InputShow(w);
+        });
+        return result;
+    }
+
+    
     UITextField* fld = [[UITextField alloc] init];
     fld.frame           = CGRectMake(0, 0, w->_textHeight, LINPUT_HEIGHT);
     fld.borderStyle     = UITextBorderStyleBezel;
@@ -441,7 +467,7 @@ static UIView* LBackend_InputShow(struct LInput* w) {
     LInput_SetKeyboardType(fld, w->inputType);
     LInput_SetPlaceholder(fld,  w->hintText);
     
-    w->meta = (__bridge void*)fld;
+    w->meta = CFBridgingRetain(fld);
     LBackend_InputUpdate(w);
     return fld;
 }
@@ -463,8 +489,16 @@ void LBackend_InputUnselect(struct LInput* w) { }
 void LBackend_LabelInit(struct LLabel* w) { }
 
 static UIView* LBackend_LabelShow(struct LLabel* w) {
+    if (!NSThread.isMainThread) {
+        __block UIView* result = nil;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            result = LBackend_LabelShow(w);
+        });
+        return result;
+    }
+    
     UILabel* lbl  = [[UILabel alloc] init];
-    w->meta       = (__bridge void*)lbl;
+    w->meta       = CFBridgingRetain(lbl);
     lbl.backgroundColor = UIColor.clearColor;
     
     if (w->small) lbl.font = [UIFont systemFontOfSize:14.0f];
@@ -473,6 +507,13 @@ static UIView* LBackend_LabelShow(struct LLabel* w) {
 }
 
 void LBackend_LabelUpdate(struct LLabel* w) {
+    if (!NSThread.isMainThread) {
+        // re-dispatch to the main thread, then bail out
+        dispatch_async(dispatch_get_main_queue(), ^{
+            LBackend_LabelUpdate(w);
+        });
+        return;
+    }
     UILabel* lbl = (__bridge UILabel*)w->meta;
     if (!lbl) return;
     
@@ -497,9 +538,17 @@ void LBackend_LineInit(struct LLine* w, int width) {
 }
 
 static UIView* LBackend_LineShow(struct LLine* w) {
+    if (!NSThread.isMainThread) {
+        __block UIView* result = nil;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            result = LBackend_LineShow(w);
+        });
+        return result;
+    }
+    
     UIView* view = [[UIView alloc] init];
     view.frame   = CGRectMake(0, 0, w->_width, LLINE_HEIGHT);
-    w->meta      = (__bridge void*)view;
+    w->meta      = CFBridgingRetain(view);
     
     BitmapCol color      = LLine_GetColor();
     view.backgroundColor = ToUIColor(color, 0.5f);
@@ -517,11 +566,20 @@ void LBackend_SliderInit(struct LSlider* w, int width, int height) {
 }
 
 static UIView* LBackend_SliderShow(struct LSlider* w) {
+    if (!NSThread.isMainThread) {
+        __block UIView* result = nil;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            result = LBackend_SliderShow(w);
+        });
+        return result;
+    }
+
+
     UIProgressView* prg = [[UIProgressView alloc] init];
     prg.frame           = CGRectMake(0, 0, w->_width, w->_height);
     prg.progressTintColor = ToUIColor(w->color, 1.0f);
     
-    w->meta = (__bridge void*)prg;
+    w->meta = CFBridgingRetain(prg);
     return prg;
 }
 
@@ -539,6 +597,15 @@ void LBackend_SliderDraw(struct LSlider* w) { }
 void LBackend_TableInit(struct LTable* w) { }
 
 static UIView* LBackend_TableShow(struct LTable* w) {
+    if (!NSThread.isMainThread) {
+        __block UIView* result = nil;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            result = LBackend_TableShow(w);
+        });
+        return result;
+    }
+
+
     UITableView* tbl = [[UITableView alloc] init];
     tbl.delegate   = ui_controller;
     tbl.dataSource = ui_controller;
@@ -547,7 +614,7 @@ static UIView* LBackend_TableShow(struct LTable* w) {
     LTable_UpdateCellColor(tbl, NULL, 1, false);
     
     //[tbl registerClass:UITableViewCell.class forCellReuseIdentifier:cellID];
-    w->meta = (__bridge void*)tbl;
+    w->meta = CFBridgingRetain(tbl);
     return tbl;
 }
 
@@ -599,24 +666,24 @@ static void LTable_UpdateCell(UITableView* table, UITableViewCell* cell, int row
 
 // TODO only redraw flags
 void LBackend_TableFlagAdded(struct LTable* w) {
-	UITableView* tbl = (__bridge UITableView*)w->meta;
-	
-	// trying to update cell.imageView.image doesn't seem to work,
-	// so pointlessly reload entire table data instead
-	NSIndexPath* selected = [tbl indexPathForSelectedRow];
-	[tbl reloadData];
-	[tbl selectRowAtIndexPath:selected animated:NO scrollPosition:UITableViewScrollPositionNone];
+    UITableView* tbl = (__bridge UITableView*)w->meta;
+    
+    // trying to update cell.imageView.image doesn't seem to work,
+    // so pointlessly reload entire table data instead
+    NSIndexPath* selected = [tbl indexPathForSelectedRow];
+    [tbl reloadData];
+    [tbl selectRowAtIndexPath:selected animated:NO scrollPosition:UITableViewScrollPositionNone];
 }
 
 /*########################################################################################################################*
  *------------------------------------------------------UI Backend--------------------------------------------------------*
  *#########################################################################################################################*/
 void LBackend_DecodeFlag(struct Flag* flag, cc_uint8* data, cc_uint32 len) {
-	NSData* ns_data = [NSData dataWithBytes:data length:len];
-	UIImage* img = [UIImage imageWithData:ns_data];
-	if (!img) return;
-	
-	flag->meta = CFBridgingRetain(img);  
+    NSData* ns_data = [NSData dataWithBytes:data length:len];
+    UIImage* img = [UIImage imageWithData:ns_data];
+    if (!img) return;
+    
+    flag->meta = CFBridgingRetain(img);
 }
 
 static void LBackend_LayoutDimensions(struct LWidget* w, CGRect* r) {
@@ -637,6 +704,14 @@ static void LBackend_LayoutDimensions(struct LWidget* w, CGRect* r) {
 }
 
 void LBackend_LayoutWidget(struct LWidget* w) {
+    if (!NSThread.isMainThread) {
+        // re-dispatch to the main thread, then bail out
+        dispatch_async(dispatch_get_main_queue(), ^{
+            LBackend_LayoutWidget(w);
+        });
+        return;
+    }
+    
     const struct LLayout* l = w->layouts;
     UIView* view = (__bridge UIView*)w->meta;
     CGRect r     = [view frame];
@@ -674,6 +749,14 @@ static UIView* ShowWidget(struct LWidget* w) {
 }
 
 void LBackend_SetScreen(struct LScreen* s) {
+    if (!NSThread.isMainThread) {
+        // re-dispatch to the main thread, then bail out
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            LBackend_SetScreen(s);
+        });
+        return;
+    }
+
     for (int i = 0; i < s->numWidgets; i++)
     {
         struct LWidget* w = s->widgets[i];
@@ -686,12 +769,23 @@ void LBackend_SetScreen(struct LScreen* s) {
 }
 
 void LBackend_CloseScreen(struct LScreen* s) {
+    if (!NSThread.isMainThread) {
+        // re-dispatch to the main thread, then bail out
+        dispatch_sync(dispatch_get_main_queue(), ^{
+            LBackend_CloseScreen(s);
+        });
+        return;
+    }
     if (!s) return;
     
     // remove reference to soon to be garbage collected views
-    for (int i = 0; i < s->numWidgets; i++)
-    {
-        s->widgets[i]->meta = NULL;
+    for (int i = 0; i < s->numWidgets; i++) {
+        struct LWidget* w = s->widgets[i];
+        if (w->meta) {
+            // Balance the earlier CFBridgingRetain
+            CFBridgingRelease(w->meta);
+            w->meta = NULL;
+        }
     }
     
     // remove all widgets from previous screen
@@ -702,3 +796,4 @@ void LBackend_CloseScreen(struct LScreen* s) {
     }
 }
 #endif
+

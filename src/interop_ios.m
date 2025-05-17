@@ -2,7 +2,7 @@
 #define GLES_SILENCE_DEPRECATION
 #include "Core.h"
 
-#if defined CC_BUILD_IOS
+#if defined CC_BUILD_IOS_LIKE
 #include "Bitmap.h"
 #include "Input.h"
 #include "Platform.h"
@@ -120,6 +120,7 @@ void LogUnhandledNSErrors(NSException* ex) {
     LogUnhandled([ex reason]);
 }
 
+#ifndef TARGET_OS_VISION
 int main(int argc, char * argv[]) {
     NSSetUncaughtExceptionHandler(LogUnhandledNSErrors);
     
@@ -127,6 +128,7 @@ int main(int argc, char * argv[]) {
         return UIApplicationMain(argc, argv, nil, NSStringFromClass([CCAppDelegate class]));
     }
 }
+#endif
 
 
 /*########################################################################################################################*
@@ -191,7 +193,10 @@ cc_result Process_StartOpen(const cc_string* args) {
     NSString* str = ToNSString(args);
     NSURL* url    = [[NSURL alloc] initWithString:str];
 
+#ifndef TARGET_OS_VISION
+    // TODO: find a way to add this back. visionOS does not support openURL
     [UIApplication.sharedApplication openURL:url];
+#endif
     return 0;
 }
 

@@ -54,7 +54,7 @@ static void AnimatedComp_CalcHumanAnim(struct AnimatedComp* anim, float idleXRot
 
 void AnimatedComp_Init(struct AnimatedComp* anim) {
 	Mem_Set(anim, 0, sizeof(struct AnimatedComp));
-	anim->BobStrengthO = 1.0f; anim->BobStrengthN = 1.0f;
+    anim->BobStrengthO = 1.0f; anim->BobStrengthN = 1.0f;
 }
 
 void AnimatedComp_Update(struct Entity* e, Vec3 oldPos, Vec3 newPos, float delta) {

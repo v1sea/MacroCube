@@ -39,6 +39,15 @@ void Utils_UNSAFE_GetFilename(STRING_REF cc_string* path);
 /* Gets rid of first directory in a path. (e.g. "dx/gl/aa.txt" -> "gl/aa.txt" */
 void Utils_UNSAFE_TrimFirstDirectory(STRING_REF cc_string* path);
 int Utils_AccumulateWheelDelta(float* accumulator, float delta);
+
+#ifdef CC_BUILD_XR
+// TODO: expose this in a config option
+// NOTE!!!! set to 1 so that we don't render the edges. The idea is to cut off the big brim around the world.
+#define Utils_AdjViewDistBoarder(value) ((int)(1.0f))
+#else
+#define Utils_AdjViewDistBoarder(value) ((int)(1.4142135f * (value)))
+#endif
+
 #define Utils_AdjViewDist(value) ((int)(1.4142135f * (value)))
 
 cc_uint8 Utils_CalcSkinType(const struct Bitmap* bmp);

@@ -133,8 +133,8 @@ FT_BEGIN_HEADER
   /*   providing a new configuration file.                                 */
   /*                                                                       */
 #if defined( __APPLE__ ) || ( defined( __MWERKS__ ) && defined( macintosh ) )
-  /* don't enable mac support on iPhone/iPad */
-#ifndef __ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__
+  /* don't enable mac support on iPhone/iPad/visionOS */
+#if !defined(__ENVIRONMENT_IPHONE_OS_VERSION_MIN_REQUIRED__) && !TARGET_OS_VISION
 #define FT_MACINTOSH 1
 #endif
 

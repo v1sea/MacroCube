@@ -31,6 +31,12 @@ typedef enum VertexFormat_ {
 	VERTEX_FORMAT_COLOURED, VERTEX_FORMAT_TEXTURED
 } VertexFormat;
 
+/* Informs the renderer what is being rendered. Used by XR systems to move GUI. */
+typedef enum {
+    SemanticPhase_CameraView,
+    SemanticPhase_GUI
+} RenderSemanticPhase;
+
 #define SIZEOF_VERTEX_COLOURED 16
 #define SIZEOF_VERTEX_TEXTURED 24
 
@@ -48,6 +54,8 @@ struct VertexTextured { float x, y, z; PackedCol Col; float U, V; };
 
 void Gfx_Create(void);
 void Gfx_Free(void);
+void Gfx_SetRenderSemanticPhase(RenderSemanticPhase phase);
+
 
 CC_VAR extern struct _GfxData {
 	/* Maximum dimensions in pixels that a texture can be created up to */

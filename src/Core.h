@@ -138,6 +138,7 @@ typedef cc_uint8  cc_bool;
 #define CC_WIN_BACKEND_COCOA    6
 #define CC_WIN_BACKEND_BEOS     7
 #define CC_WIN_BACKEND_ANDROID  8
+#define CC_WIN_BACKEND_VISIONOS 9
 
 #define CC_GFX_BACKEND_SOFTGPU   1
 #define CC_GFX_BACKEND_GL1       2
@@ -145,6 +146,7 @@ typedef cc_uint8  cc_bool;
 #define CC_GFX_BACKEND_D3D9      4
 #define CC_GFX_BACKEND_D3D11     5
 #define CC_GFX_BACKEND_VULKAN    6
+#define CC_GFX_BACKEND_METAL     7
 
 #define CC_SSL_BACKEND_NONE     1
 #define CC_SSL_BACKEND_BEARSSL  2
@@ -265,9 +267,19 @@ typedef cc_uint8  cc_bool;
 		#define CC_BUILD_MOBILE
 		#define CC_BUILD_GLES
 		#define CC_BUILD_IOS
+        #define CC_BUILD_IOS_LIKE
 		#define CC_BUILD_TOUCH
 		#define CC_BUILD_CFNETWORK
 		#define DEFAULT_GFX_BACKEND CC_GFX_BACKEND_GL2
+    #elif defined TARGET_OS_VISION
+        #define CC_BUILD_MOBILE
+        #define CC_BUILD_XR // Meant to be any generic XR headset
+        #define CC_BUILD_VISIONOS
+        #define CC_BUILD_IOS_LIKE // There is some major overlap with ios for visionOS, but enough differences we need to differentiate them.
+        #define CC_BUILD_TOUCH
+        #define CC_BUILD_CFNETWORK
+        #define DEFAULT_GFX_BACKEND CC_GFX_BACKEND_METAL
+        #define DEFAULT_WIN_BACKEND CC_WIN_BACKEND_VISIONOS
 	#else
 		#define DEFAULT_NET_BACKEND CC_NET_BACKEND_LIBCURL
 		#define DEFAULT_WIN_BACKEND CC_WIN_BACKEND_COCOA

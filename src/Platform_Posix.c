@@ -41,7 +41,7 @@ const cc_result ReturnCode_SocketDropped    = EPIPE;
 
 #if defined CC_BUILD_ANDROID
 const char* Platform_AppNameSuffix = " android alpha";
-#elif defined CC_BUILD_IOS
+#elif defined CC_BUILD_IOS_LIKE
 const char* Platform_AppNameSuffix = " iOS alpha";
 #else
 const char* Platform_AppNameSuffix = "";
@@ -115,7 +115,7 @@ void Mem_Free(void* mem) {
 *#########################################################################################################################*/
 #if defined CC_BUILD_ANDROID
 /* implemented in Platform_Android.c */
-#elif defined CC_BUILD_IOS
+#elif defined CC_BUILD_IOS_LIKE
 /* implemented in interop_ios.m */
 #else
 void Platform_Log(const char* msg, int len) {
@@ -280,7 +280,7 @@ void Platform_EncodePath(cc_filepath* dst, const cc_string* path) {
 
 #if defined CC_BUILD_ANDROID
 /* implemented in Platform_Android.c */
-#elif defined CC_BUILD_IOS
+#elif defined CC_BUILD_IOS_LIKE
 /* implemented in interop_ios.m */
 #else
 void Directory_GetCachePath(cc_string* path) { }
@@ -906,7 +906,7 @@ void Process_Exit(cc_result code) { exit(code); }
 /* Opening browser/starting shell is not really standardised */
 #if defined CC_BUILD_ANDROID
 /* Implemented in Platform_Android.c */
-#elif defined CC_BUILD_IOS
+#elif defined CC_BUILD_IOS_LIKE
 /* implemented in interop_ios.m */
 #elif defined CC_BUILD_MACOS
 cc_result Process_StartOpen(const cc_string* args) {
@@ -1121,7 +1121,7 @@ cc_bool Updater_Supported = true;
 
 #if defined CC_BUILD_ANDROID
 /* implemented in Platform_Android.c */
-#elif defined CC_BUILD_IOS
+#elif defined CC_BUILD_IOS_LIKE
 /* implemented in interop_ios.m */
 #else
 cc_bool Updater_Clean(void) { return true; }
@@ -1529,7 +1529,7 @@ static cc_result GetMachineID(cc_uint32* key) {
 	DecodeMachineID(dirBuffer, dir.length, key);
 	return 0;
 }
-#elif defined CC_BUILD_IOS
+#elif defined CC_BUILD_IOS_LIKE
 extern void GetDeviceUUID(cc_string* str);
 
 static cc_result GetMachineID(cc_uint32* key) {

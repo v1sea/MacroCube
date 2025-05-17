@@ -245,6 +245,8 @@ static cc_bool gfx_hadFog;
 void Gfx_Begin2D(int width, int height) {
 	struct Matrix ortho;
 	gfx_rendering2D = true;
+    
+    Gfx_SetRenderSemanticPhase(SemanticPhase_GUI);
 
 	/* intentionally biased more towards positive Z to reduce 2D clipping issues on the DS */
 	Gfx_CalcOrthoMatrix(&ortho, (float)width, (float)height, -100.0f, 1000.0f);
@@ -317,9 +319,11 @@ void Gfx_RecreateTexture(GfxResourceID* tex, struct Bitmap* bmp, cc_uint8 flags,
 	*tex = Gfx_CreateTexture(bmp, flags, mipmaps);
 }
 
+#ifndef CC_GFX_BACKEND_METAL
 void Gfx_UpdateTexturePart(GfxResourceID texId, int x, int y, struct Bitmap* part, cc_bool mipmaps) {
 	Gfx_UpdateTexture(texId, x, y, part, part->width, mipmaps);
 }
+#endif
 
 static CC_INLINE void CopyTextureData(void* dst, int dstStride, const struct Bitmap* src, int srcStride) {
 	cc_uint8* src_ = (cc_uint8*)src->scan0;
@@ -483,7 +487,7 @@ GfxResourceID Gfx_CreateDynamicVb(VertexFormat fmt, int maxVertices) {
 	}
 }
 
-#if CC_GFX_BACKEND_IS_GL() || (CC_GFX_BACKEND == CC_GFX_BACKEND_D3D9)
+#if CC_GFX_BACKEND_IS_GL() || (CC_GFX_BACKEND == CC_GFX_BACKEND_D3D9 || (CC_GFX_BACKEND == CC_GFX_BACKEND_METAL))
 /* Slightly more efficient implementations are defined in the backends */
 #else
 void Gfx_SetDynamicVbData(GfxResourceID vb, void* vertices, int vCount) {

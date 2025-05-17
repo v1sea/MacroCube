@@ -212,7 +212,7 @@ static int RunProgram(int argc, char** argv) {
 	return 0;
 }
 
-#if defined CC_BUILD_IOS
+#if defined CC_BUILD_IOS_LIKE
 /* ClassiCube is sort of and sort of not the executable */
 /*  on iOS - UIKit is responsible for kickstarting the game. */
 /* (this is handled in interop_ios.m as the code is Objective C) */

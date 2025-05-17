@@ -23,6 +23,8 @@ CC_VAR extern struct _GameData {
 	Game_Draw2DHook Draw2DHooks[4];
 } Game;
 
+void Game_SetRunning(cc_bool running);
+
 extern struct RayTracer Game_SelectedPos;
 extern cc_bool Game_UseCPEBlocks;
 

@@ -4,7 +4,7 @@
 #elif defined CC_BUILD_WIN_TEST
 /* Testing windows UI backend */
 #include "LBackend_Win.c"
-#elif defined CC_BUILD_IOS
+#elif defined CC_BUILD_IOS_LIKE
 /* iOS uses custom UI backend */
 #else
 #include "Launcher.h"

@@ -85,7 +85,7 @@ static void LButton_DrawBase(struct Context2D* ctx, int x, int y, int width, int
 
 static void LButton_DrawBorder(struct Context2D* ctx, int x, int y, int width, int height) {
 	BitmapCol backColor = Launcher_Theme.ButtonBorderColor;
-#ifdef CC_BUILD_IOS
+#ifdef CC_BUILD_IOS_LIKE
 	LWidget_DrawBorder(ctx,      backColor, oneX, oneY, x, y, width, height);
 #else
 	LWidget_DrawInsetBorder(ctx, backColor, oneX, oneY, x, y, width, height);

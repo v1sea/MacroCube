@@ -1073,7 +1073,7 @@ void SysFont_DrawText(struct DrawTextArgs* args, struct Bitmap* bmp, int x, int 
 		xOffset += interop_TextDraw(buffer, len, bmp, x + (int)xOffset, y, shadow, hexBuffer);
 	}
 }
-#elif defined CC_BUILD_IOS
+#elif defined CC_BUILD_IOS_LIKE
 /* implemented in interop_ios.m */
 extern void interop_GetFontNames(struct StringsBuffer* buffer);
 extern cc_result interop_SysFontMake(struct FontDesc* desc, const cc_string* fontName, int size, int flags);

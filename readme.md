@@ -1,3 +1,27 @@
+# MacroCube is a fork of ClassiCube for visionOS.
+The main changes are adding a Metal renderer, supporting XR rendering via CompositorServices, and swapping from the UIKit to SwiftUI app lifecycle.
+
+# How to build
+1) clone the repo
+2) Open misc/visionOS in XCode
+3) Set the development team in CCVisionOS > Signing & Capabilities > Team
+4) Install to your device.
+
+# Issues
+* Wrist menu is not functional.
+* Multi-player needs SetReach called on join to avoid being kicked on block placement.
+* Fix the loading bar on asset download.
+* Remove the camera smoothing in XR mode.
+* Reduce duplication of the UIKit components from the ios version.
+* Enable the 2d metal renderer mode.
+
+# Future Plans
+Once the UI work is complete and a few loose ends are tied up in the renderer this would ideally be upstreamed to ClassiCube.
+
+
+Below is the ClassiCube README.
+-----------------------------------------------------------------------
+
 ClassiCube is a custom Minecraft Classic compatible client written in C from scratch.<br>
 > [!IMPORTANT]
 **ClassiCube is not affiliated with (or supported by) Mojang AB, Minecraft, or Microsoft in any way.** <br><br>

@@ -179,7 +179,7 @@ static CC_NOINLINE void BuildClouds(void) {
 
 	if (!World.Loaded || EnvRenderer_Minimal) return;
 
-	extent = Utils_AdjViewDist(Game_ViewDistance);
+	extent = Utils_AdjViewDistBoarder(Game_ViewDistance);
 	x1 = -extent; x2 = World.Width  + extent;
 	z1 = -extent; z2 = World.Length + extent;
 	clouds_vertices = CalcNumVertices(x2 - x1, z2 - z1);
@@ -247,7 +247,7 @@ static CC_NOINLINE void BuildSky(void) {
 
 	if (!World.Loaded || EnvRenderer_Minimal) return;
 
-	extent = Utils_AdjViewDist(Game_ViewDistance);
+	extent = Utils_AdjViewDistBoarder(Game_ViewDistance);
 	x1 = -extent; x2 = World.Width  + extent;
 	z1 = -extent; z2 = World.Length + extent;
 	sky_vertices = CalcNumVertices(x2 - x1, z2 - z1);
@@ -262,6 +262,11 @@ static CC_NOINLINE void BuildSky(void) {
 }
 
 void EnvRenderer_RenderSky(void) {
+    // TODO: integrate sky rendering flag use to avoid special case for XR mode.
+#ifdef CC_BUILD_XR
+    return;
+#endif
+    
 	struct Matrix m;
 	float skyY, normY, dy;
 	if (EnvRenderer_ShouldRenderSkybox()) return;
@@ -610,7 +615,7 @@ static Rect2D EnvRenderer_Rect(int x, int y, int width, int height) {
 }
 
 static void CalcBorderRects(Rect2D* rects) {
-	int extent = Utils_AdjViewDist(Game_ViewDistance);
+	int extent = Utils_AdjViewDistBoarder(Game_ViewDistance);
 	rects[0] = EnvRenderer_Rect(-extent, -extent,      extent + World.Width + extent, extent);
 	rects[1] = EnvRenderer_Rect(-extent, World.Length, extent + World.Width + extent, extent);
 
